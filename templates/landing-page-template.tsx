@@ -41,15 +41,7 @@ export function LandingPageTemplate({
         </div>
       )}
       
-      {/* Global font styles */}
-      <style jsx global>{`
-        body {
-          font-family: ${brandStyle?.fontFamilies?.[1] || brandStyle?.fontFamilies?.[0] || 'Inter, system-ui, sans-serif'};
-        }
-        h1, h2, h3, h4, h5, h6 {
-          font-family: ${brandStyle?.fontFamilies?.[0] || 'Inter, system-ui, sans-serif'};
-        }
-      `}</style>
+      {/* Font styles are now handled in app/globals.css */}
       
       {sections.hero && (
         <HeroSection

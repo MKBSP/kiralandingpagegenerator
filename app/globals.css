@@ -79,4 +79,6 @@
   body {
     @apply bg-background text-foreground;
   }
+/* Brand font-family injection (set via Tailwind or inline style on root) */
+/* Example: body[data-brand-font="Montserrat"] { font-family: 'Montserrat', Inter, system-ui, sans-serif; } */
 }
