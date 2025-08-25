@@ -1,29 +1,29 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Edge Functions do not support Node.js modules like 'stream', 'fs', 'url', or 'path'.
+// Ensure no Node.js APIs are used here.
+
 export function middleware(request: NextRequest) {
   // Rate limiting for admin routes
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    const ip = request.ip ?? '127.0.0.1';
-    
-    // In a production environment, you'd implement proper rate limiting here
-    // For now, we'll just add security headers
+    // Security headers only, no Node.js APIs
     const response = NextResponse.next();
-    
+
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-XSS-Protection', '1; mode=block');
-    
+
     return response;
   }
 
   // Security headers for landing pages
   if (request.nextUrl.pathname !== '/' && !request.nextUrl.pathname.startsWith('/api')) {
     const response = NextResponse.next();
-    
+
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    
+
     return response;
   }
 
