@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/database';
 import { LandingPageTemplate } from '@/templates/landing-page-template';
 import type { Metadata } from 'next';
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: {
@@ -76,27 +77,26 @@ export default async function LandingPage({ params }: PageProps) {
     <LandingPageTemplate
       sections={sections}
       clientName={project.clientName}
-      brandStyle={project.brandStyle || undefined}
+      brandStyle={
+        project.brandStyle
+          ? {
+              primaryColor: project.brandStyle.primaryColor ?? undefined,
+              secondaryColor: project.brandStyle.secondaryColor ?? undefined,
+              accentColor: project.brandStyle.accentColor ?? undefined,
+              fontFamilies: project.brandStyle.fontFamilies ?? [],
+              logoUrl: project.brandStyle.logoUrl ?? undefined,
+              faviconUrl: project.brandStyle.faviconUrl ?? undefined,
+            }
+          : undefined
+      }
       isDemo={isDemo}
     />
   );
 }
 
-// Generate static paths for ISR
-export async function generateStaticParams() {
-  // In production, you might want to generate paths for published pages
-  const projects = await prisma.project.findMany({
-    where: {
-      status: 'ready',
-      page: { isNot: null }
-    },
-    select: { slug: true }
-  });
-
-  return projects.map((project) => ({
-    slug: project.slug,
-  }));
-}
+/* Static export for [slug] is disabled due to Prisma/Postgres limitations during build.
+   This page will use runtime rendering (ISR/SSR) only.
+*/
 
 // Enable ISR with revalidation
 export const revalidate = process.env.NODE_ENV === 'production' ? 3600 : 0; // 1 hour in production

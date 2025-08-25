@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/database';
-import { scrapeBrandData, createBrandStyle } from '@/lib/brand-scraper';
 import { createPage, generateSlug, selectTemplate } from '@/lib/page-generator';
 
 const createProjectSchema = z.object({
@@ -43,7 +42,22 @@ export async function POST(request: NextRequest) {
     });
     
     // Start background processing (in a real app, this would be queued)
-    processBrandScraping(project.id, data.sourceUrl, data.clientName, data.templateKey);
+    // Dynamically import BullMQ and enqueue job only at runtime
+    if (process.env.NODE_ENV !== 'test') {
+      const { Queue } = await import('bullmq');
+      const redisConnection = {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: Number(process.env.REDIS_PORT) || 6379,
+        password: process.env.REDIS_PASSWORD || undefined,
+      };
+      const brandScrapeQueue = new Queue('brandScrape', { connection: redisConnection });
+      await brandScrapeQueue.add('brandScrape', {
+        projectId: project.id,
+        sourceUrl: data.sourceUrl,
+        clientName: data.clientName,
+        templateKey: data.templateKey,
+      });
+    }
     
     return NextResponse.json({
       projectId: project.id,
@@ -56,7 +70,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { error: 'Invalid request data', details: error.issues },
         { status: 400 }
       );
     }
@@ -99,37 +113,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function processBrandScraping(projectId: string, sourceUrl: string, clientName: string, templateKey: string) {
-  try {
-    // Scrape brand data
-    const brandData = await scrapeBrandData(sourceUrl);
-    
-    // Create brand style
-    const brandStyle = await createBrandStyle(projectId, brandData);
-    
-    // Select template
-    const finalTemplateKey = selectTemplate(brandStyle, templateKey);
-    
-    // Create page with sections
-    await createPage(projectId, clientName);
-    
-    // Update project status
-    await prisma.project.update({
-      where: { id: projectId },
-      data: {
-        status: 'ready',
-        templateKey: finalTemplateKey
-      }
-    });
-    
-    console.log(`Project ${projectId} processed successfully`);
-    
-  } catch (error) {
-    console.error(`Brand scraping failed for project ${projectId}:`, error);
-    
-    await prisma.project.update({
-      where: { id: projectId },
-      data: { status: 'error' }
-    });
-  }
-}
+/*
+  Brand scraping and page generation is now handled by the BullMQ worker.
+  This function is no longer needed in the API route.
+*/

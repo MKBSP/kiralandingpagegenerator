@@ -23,7 +23,7 @@ model Project {
   createdAt     DateTime @default(now())
   expiresAt     DateTime?
   
-  @@map("projects")
+  @@map("kira_projects")
 }
 
 model BrandStyle {
@@ -39,7 +39,7 @@ model BrandStyle {
   createdAt        DateTime @default(now())
   projects         Project[]
   
-  @@map("brand_styles")
+  @@map("kira_brand_styles")
 }
 
 model Page {
@@ -51,5 +51,5 @@ model Page {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   
-  @@map("pages")
+  @@map("kira_pages")
 }

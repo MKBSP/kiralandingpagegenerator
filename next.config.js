@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // output: 'export', // Disabled to allow SSR/ISR for dynamic routes
   eslint: {
     ignoreDuringBuilds: true,
   },

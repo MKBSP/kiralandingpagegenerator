@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import * as cheerio from 'cheerio';
-import Vibrant from 'node-vibrant';
+import * as Vibrant from 'node-vibrant';
 import { prisma } from './database';
 
 export interface BrandData {
@@ -91,9 +91,9 @@ async function extractColors(page: any, url: string): Promise<{ primary?: string
       .filter(Boolean);
     
     return {
-      primary: validColors[0],
-      secondary: validColors[1],
-      accent: validColors[2]
+      primary: validColors[0] ?? undefined,
+      secondary: validColors[1] ?? undefined,
+      accent: validColors[2] ?? undefined
     };
   } catch (error) {
     console.error('Color extraction failed:', error);

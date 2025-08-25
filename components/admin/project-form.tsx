@@ -15,9 +15,9 @@ import { TEMPLATES, TONES, LANGUAGES } from '@/lib/constants';
 const formSchema = z.object({
   sourceUrl: z.string().url('Please enter a valid URL'),
   clientName: z.string().min(1, 'Client name is required'),
-  templateKey: z.string().default('auto'),
-  tone: z.enum(['corporate', 'neutral', 'friendly']).default('neutral'),
-  locale: z.enum(['auto', 'en', 'es', 'pt']).default('auto')
+  templateKey: z.string(),
+  tone: z.enum(['corporate', 'neutral', 'friendly']),
+  locale: z.enum(['auto', 'en', 'es', 'pt'])
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,6 +38,8 @@ export function ProjectForm({ onSuccess }: ProjectFormProps) {
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      sourceUrl: '',
+      clientName: '',
       templateKey: 'auto',
       tone: 'neutral',
       locale: 'auto'
